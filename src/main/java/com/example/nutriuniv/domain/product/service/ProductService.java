@@ -12,6 +12,7 @@ import com.example.nutriuniv.domain.product.repository.BrandRepository;
 import com.example.nutriuniv.domain.product.repository.ProductNutrientRepository;
 import com.example.nutriuniv.domain.product.repository.ProductRepository;
 import com.example.nutriuniv.domain.product.specification.ProductSpecification;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,13 +31,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductService {
 
-    private static final Set<String> ALLOWED_SORT_VALUES  = Set.of("POPULAR", "SCORE", "ACCURACY", "RECOMMENDED");
-    private static final Set<String> ALLOWED_LINK_STATUS  = Set.of("LINKED", "UNLINKED", "FAILED");
+    private static final Set<String> ALLOWED_SORT_VALUES = Set.of("POPULAR", "SCORE", "ACCURACY", "RECOMMENDED");
+    private static final Set<String> ALLOWED_LINK_STATUS = Set.of("LINKED", "UNLINKED", "FAILED");
 
     private final ProductRepository productRepository;
     private final ProductNutrientRepository productNutrientRepository;
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
+    private final EntityManager entityManager;
 
     // ── 일반 유저: 상품 목록 조회 ─────────────────────────────────────────────────
 
@@ -187,13 +189,46 @@ public class ProductService {
         product.deactivate();
     }
 
-    // ── 관리자: 상품 전체 삭제 (초기화) ──────────────────────────────────────────
-    // product_nutrients → products 순으로 삭제 (FK 제약 순서)
+    // ── 관리자: 전체 초기화 ───────────────────────────────────────────────────────
+    // 현재 구현된 테이블만 포함. 추후 도메인 추가 시 해당 테이블도 여기에 추가할 것.
+    //
+    // TODO: 아래 테이블 구현 후 TRUNCATE 목록에 추가
+    //   - coupang_links       (쿠팡 연동 구현 시)
+    //   - user_favorites      (찜 도메인 구현 시)
+    //   - user_compares       (비교 도메인 구현 시)
+    //   - reviews, review_images (리뷰 도메인 구현 시)
+    //   - product_view_logs   (로깅 도메인 구현 시)
 
     @Transactional
-    public void resetProducts() {
-        productNutrientRepository.deleteAll();
-        productRepository.deleteAll();
+    public void resetAll() {
+        // 1. product_nutrients (products FK 참조)
+        entityManager.createNativeQuery(
+                "TRUNCATE TABLE product_nutrients RESTART IDENTITY CASCADE"
+        ).executeUpdate();
+
+        // 2. products 본체
+        entityManager.createNativeQuery(
+                "TRUNCATE TABLE products RESTART IDENTITY CASCADE"
+        ).executeUpdate();
+
+        // 3. brands
+        entityManager.createNativeQuery(
+                "TRUNCATE TABLE brands RESTART IDENTITY CASCADE"
+        ).executeUpdate();
+
+        // 4. categories: 셀프 참조(parent_id) 때문에 depth 역순으로 DELETE 후 시퀀스 리셋
+        entityManager.createNativeQuery(
+                "DELETE FROM categories WHERE depth = 3"
+        ).executeUpdate();
+        entityManager.createNativeQuery(
+                "DELETE FROM categories WHERE depth = 2"
+        ).executeUpdate();
+        entityManager.createNativeQuery(
+                "DELETE FROM categories WHERE depth = 1"
+        ).executeUpdate();
+        entityManager.createNativeQuery(
+                "ALTER SEQUENCE categories_id_seq RESTART WITH 1"
+        ).executeUpdate();
     }
 
     // ── 검증 헬퍼 ─────────────────────────────────────────────────────────────────
@@ -222,7 +257,7 @@ public class ProductService {
             case "POPULAR"     -> Sort.by(Sort.Direction.DESC, "viewCount");
             case "SCORE"       -> Sort.by(Sort.Direction.DESC, "nutritionScore");
             case "ACCURACY",
-                 "RECOMMENDED" -> Sort.by(Sort.Direction.DESC, "createdAt");
+                 "RECOMMENDED" -> Sort.by(Sort.Direction.DESC, "createdAt");   // TODO: 추천순, 정확도순 구현
             default            -> Sort.by(Sort.Direction.DESC, "createdAt");
         };
     }
