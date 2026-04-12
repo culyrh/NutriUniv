@@ -66,11 +66,11 @@ public class ProductController {
 
     // DELETE /admin/products/reset
     // /admin/products/{productId} 보다 먼저 선언해야 "reset"이 경로변수로 잡히지 않음
-    @Operation(summary = "상품 전체 삭제 (초기화)",
-            description = "product_nutrients -> products 순으로 전체 삭제합니다.")
+    @Operation(summary = "전체 초기화",
+            description = "상품, 영양정보, 브랜드, 카테고리를 모두 삭제하고 시퀀스(id)를 1로 리셋합니다.")
     @DeleteMapping("/admin/products/reset")
-    public ResponseEntity<CommonResponse<Void>> resetProducts() {
-        productService.resetProducts();
+    public ResponseEntity<CommonResponse<Void>> resetAll() {
+        productService.resetAll();
         return ResponseEntity.ok(CommonResponse.success(null));
     }
 
@@ -88,7 +88,7 @@ public class ProductController {
 
     // DELETE /admin/products/{productId}
     @Operation(summary = "상품 비활성화",
-            description = "상품을 소프트 딜리트(is_active=false) 처리합니다. 이미 비활성화된 상품은 409 반환.")
+            description = "특정 상품을 소프트 딜리트(is_active=false) 처리합니다. 이미 비활성화된 상품은 409 반환.")
     @DeleteMapping("/admin/products/{productId}")
     public ResponseEntity<CommonResponse<Void>> deactivateProduct(
             @Parameter(description = "상품 ID") @PathVariable Long productId) {
