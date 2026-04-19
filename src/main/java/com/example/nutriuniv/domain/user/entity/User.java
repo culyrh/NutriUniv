@@ -73,9 +73,11 @@ public class User {
         return u;
     }
 
-    public void update(String name, String gender, LocalDate birthDate) {
-        if (name != null) this.name = name;
-        if (gender != null) this.gender = gender;
+    public void update(String name, String email, String nickname, String gender, LocalDate birthDate) {
+        if (name != null)      this.name      = name;
+        if (email != null)     this.email     = email;
+        if (nickname != null)  this.nickname  = nickname;
+        if (gender != null)    this.gender    = gender;
         if (birthDate != null) this.birthDate = birthDate;
     }
 

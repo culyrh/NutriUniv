@@ -32,11 +32,13 @@ public class UserService {
 
     @Transactional
     public UserResponse updateMe(Long userId, UserUpdateRequest request) {
-        if (request.getName() == null && request.getGender() == null && request.getBirthDate() == null) {
+        if (request.getName() == null && request.getEmail() == null && request.getNickname() == null
+                && request.getGender() == null && request.getBirthDate() == null) {
             throw new CustomException(ErrorCode.BAD_REQUEST, "수정할 항목이 없습니다.");
         }
         User user = getUser(userId);
-        user.update(request.getName(), request.getGender(), request.getBirthDate());
+        user.update(request.getName(), request.getEmail(), request.getNickname(),
+                request.getGender(), request.getBirthDate());
         return UserResponse.from(user);
     }
 
