@@ -6,6 +6,7 @@ import com.example.nutriuniv.domain.user.dto.*;
 import com.example.nutriuniv.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,7 +31,7 @@ public class UserController {
     @PatchMapping
     public ResponseEntity<CommonResponse<UserResponse>> updateMe(
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestBody UserUpdateRequest request) {
+            @Valid @RequestBody UserUpdateRequest request) {
         return ResponseEntity.ok(CommonResponse.success(userService.updateMe(principal.getId(), request)));
     }
 
