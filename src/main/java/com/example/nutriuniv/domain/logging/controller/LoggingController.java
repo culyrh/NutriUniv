@@ -1,6 +1,7 @@
 package com.example.nutriuniv.domain.logging.controller;
 
 import com.example.nutriuniv.common.response.CommonResponse;
+import com.example.nutriuniv.common.security.UserPrincipal;
 import com.example.nutriuniv.domain.logging.dto.SearchLogRequest;
 import com.example.nutriuniv.domain.logging.dto.ViewLogRequest;
 import com.example.nutriuniv.domain.logging.service.LoggingService;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,10 +29,11 @@ public class LoggingController {
                     "비로그인 시 user_id는 null로 저장됩니다.")
     @PostMapping("/logging/view")
     public ResponseEntity<CommonResponse<Void>> logView(
+            @AuthenticationPrincipal(required = false) UserPrincipal principal,
             @RequestBody ViewLogRequest request,
             HttpServletRequest httpServletRequest) {
 
-        Long userId = null;   // TODO: 인증 구현 후 SecurityContext에서 꺼낼 예정
+        Long userId = principal != null ? principal.getId() : null;
         String ipAddress = resolveClientIp(httpServletRequest);
         loggingService.logProductView(request, userId, ipAddress);
         return ResponseEntity.ok(CommonResponse.success(null));
@@ -44,9 +47,10 @@ public class LoggingController {
                     "비로그인 시 user_id는 null로 저장됩니다.")
     @PostMapping("/logging/search")
     public ResponseEntity<CommonResponse<Void>> logSearch(
+            @AuthenticationPrincipal(required = false) UserPrincipal principal,
             @RequestBody SearchLogRequest request) {
 
-        Long userId = null;   // TODO: 인증 구현 후 SecurityContext에서 꺼낼 예정
+        Long userId = principal != null ? principal.getId() : null;
         loggingService.logSearch(request, userId);
         return ResponseEntity.ok(CommonResponse.success(null));
     }
