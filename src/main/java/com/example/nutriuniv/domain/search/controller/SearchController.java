@@ -1,6 +1,7 @@
 package com.example.nutriuniv.domain.search.controller;
 
 import com.example.nutriuniv.common.response.CommonResponse;
+import com.example.nutriuniv.common.security.UserPrincipal;
 import com.example.nutriuniv.domain.search.dto.PopularKeywordResponse;
 import com.example.nutriuniv.domain.search.dto.RecentKeywordResponse;
 import com.example.nutriuniv.domain.search.service.SearchService;
@@ -8,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,8 +36,8 @@ public class SearchController {
                     "동일 키워드는 가장 최근 검색 시각으로 중복 제거됩니다. " +
                     "비로그인 시 401을 반환합니다.")
     @GetMapping("/search/keywords/recent")
-    public ResponseEntity<CommonResponse<List<RecentKeywordResponse>>> getRecentKeywords() {
-        Long userId = null;   // TODO: 인증 구현 후 SecurityContext에서 꺼낼 예정
-        return ResponseEntity.ok(CommonResponse.success(searchService.getRecentKeywords(userId)));
+    public ResponseEntity<CommonResponse<List<RecentKeywordResponse>>> getRecentKeywords(
+            @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(CommonResponse.success(searchService.getRecentKeywords(principal.getId())));
     }
 }
