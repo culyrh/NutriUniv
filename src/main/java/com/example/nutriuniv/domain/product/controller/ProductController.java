@@ -29,8 +29,8 @@ public class ProductController {
                     "로그인 시 찜 여부(isFavorited)가 반영됩니다.")
     @GetMapping("/products")
     public ResponseEntity<CommonResponse<ProductPageResponse>> getProducts(
-            @ModelAttribute ProductSearchRequest request,
-            @AuthenticationPrincipal UserPrincipal principal) {
+            @AuthenticationPrincipal UserPrincipal principal,
+            @ModelAttribute ProductSearchRequest request) {
 
         Long userId = principal != null ? principal.getId() : null;
         return ResponseEntity.ok(CommonResponse.success(productService.getProducts(request, userId)));
@@ -42,8 +42,8 @@ public class ProductController {
                     "로그인 시 찜 여부(isFavorited)가 반영됩니다.")
     @GetMapping("/products/{productId}")
     public ResponseEntity<CommonResponse<ProductDetailResponse>> getProduct(
-            @Parameter(description = "상품 ID") @PathVariable Long productId,
-            @AuthenticationPrincipal UserPrincipal principal) {
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Parameter(description = "상품 ID") @PathVariable Long productId) {
 
         Long userId = principal != null ? principal.getId() : null;
         return ResponseEntity.ok(CommonResponse.success(productService.getProduct(productId, userId)));
