@@ -25,7 +25,8 @@ public class ProductController {
 
     // GET /products
     @Operation(summary = "상품 목록 조회",
-            description = "키워드, 카테고리, 브랜드, 영양소 범위 필터로 상품 목록을 조회합니다.")
+            description = "키워드, 카테고리, 브랜드, 영양소 범위 필터로 상품 목록을 조회합니다. " +
+                    "로그인 시 찜 여부(isFavorited)가 반영됩니다.")
     @GetMapping("/products")
     public ResponseEntity<CommonResponse<ProductPageResponse>> getProducts(
             @AuthenticationPrincipal UserPrincipal principal,
@@ -37,7 +38,8 @@ public class ProductController {
 
     // GET /products/{productId}
     @Operation(summary = "상품 상세 조회",
-            description = "상품 ID로 상세 정보를 조회합니다. 조회 시 view_count가 1 증가합니다.")
+            description = "상품 ID로 상세 정보를 조회합니다. 조회 시 view_count가 1 증가합니다. " +
+                    "로그인 시 찜 여부(isFavorited)가 반영됩니다.")
     @GetMapping("/products/{productId}")
     public ResponseEntity<CommonResponse<ProductDetailResponse>> getProduct(
             @AuthenticationPrincipal UserPrincipal principal,
@@ -69,9 +71,8 @@ public class ProductController {
     }
 
     // DELETE /admin/products/reset
-    // /admin/products/{productId} 보다 먼저 선언해야 "reset"이 경로변수로 잡히지 않음
     @Operation(summary = "전체 초기화",
-            description = "상품, 영양정보, 브랜드, 카테고리를 모두 삭제하고 시퀀스(id)를 1로 리셋합니다.")
+            description = "상품, 영양정보, 브랜드, 카테고리, 리뷰, 찜을 모두 삭제하고 시퀀스(id)를 1로 리셋합니다.")
     @DeleteMapping("/admin/products/reset")
     public ResponseEntity<CommonResponse<Void>> resetAll() {
         productService.resetAll();
