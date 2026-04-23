@@ -2,6 +2,10 @@ package com.example.nutriuniv.domain.product.repository;
 
 import com.example.nutriuniv.domain.brand.entity.Brand;
 import com.example.nutriuniv.domain.product.entity.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -40,5 +44,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     @Query("SELECT MAX(p.updatedAt) FROM Product p WHERE p.isActive = true")
     java.time.LocalDateTime findLatestUpdatedAt();
+
+    @EntityGraph(attributePaths = {"coupangLink"})
+    Page<Product> findAll(Specification<Product> spec, Pageable pageable);
 }
 
