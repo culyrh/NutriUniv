@@ -23,7 +23,7 @@ public class AuthController {
     private final AuthService authService;
 
     @Operation(summary = "소셜 로그인",
-            description = "기존회원이면 토큰 반환. 신규회원이면 is_new_user=true + googleEmail + oauthId 반환 (토큰 없음).")
+            description = "기존회원이면 토큰 반환. 신규회원이면 newUser=true + oauthId 반환 (토큰 없음).")
     @PostMapping("/oauth")
     public ResponseEntity<CommonResponse<TokenResponse>> login(@RequestBody OAuthLoginRequest request) {
         return ResponseEntity.ok(CommonResponse.success(authService.login(request)));
