@@ -1,5 +1,6 @@
 package com.example.nutriuniv.domain.product.specification;
 
+import com.example.nutriuniv.domain.coupang.entity.CoupangLink;
 import com.example.nutriuniv.domain.product.entity.Product;
 import com.example.nutriuniv.domain.product.entity.ProductNutrient;
 import jakarta.persistence.criteria.Join;
@@ -143,5 +144,14 @@ public class ProductSpecification {
     public static Specification<Product> hasMaxNutritionScore(BigDecimal max) {
         return (root, query, cb) -> max == null ? null
                 : cb.lessThanOrEqualTo(root.get("nutritionScore"), max);
+    }
+
+    // ── 쿠팡 링크 ─────────────────────────────────────────────────────────────────
+    public static Specification<Product> hasLinkStatus(String linkStatus) {
+        return (root, query, cb) -> {
+            if (linkStatus == null) return null;
+            Join<Product, CoupangLink> join = root.join("coupangLink", JoinType.LEFT);
+            return cb.equal(join.get("linkStatus"), linkStatus);
+        };
     }
 }

@@ -2,6 +2,7 @@ package com.example.nutriuniv.domain.product.entity;
 
 import com.example.nutriuniv.domain.brand.entity.Brand;
 import com.example.nutriuniv.domain.category.entity.Category;
+import com.example.nutriuniv.domain.coupang.entity.CoupangLink;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -32,6 +33,9 @@ public class Product {
 
     @OneToOne(mappedBy = "product", fetch = FetchType.LAZY)
     private ProductNutrient productNutrient;
+
+    @OneToOne(mappedBy = "product", fetch = FetchType.LAZY)
+    private CoupangLink coupangLink;
 
     @Column(nullable = false, length = 255)
     private String name;
