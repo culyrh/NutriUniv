@@ -52,6 +52,10 @@ public class Product {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
+    // pgvector 타입 (10차원). Python vectorize.py가 직접 write한다.
+    @Column(name = "nutrient_vector", columnDefinition = "vector(10)")
+    private String nutrientVector;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
