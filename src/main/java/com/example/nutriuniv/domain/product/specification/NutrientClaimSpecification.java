@@ -12,13 +12,6 @@ import org.springframework.data.jpa.domain.Specification;
 import java.math.BigDecimal;
 import java.util.List;
 
-/**
- * 영양 강조표시 기준 Specification (식품표시 등에 관한 법률)
- *
- * serving_size ILIKE '%ml%' → 액체 → per100mL 기준
- * serving_size ILIKE '%g%'  → 고체 → per100g 기준
- * 기타(1마리 등 13건)       → 필터 제외
- */
 public class NutrientClaimSpecification {
 
     @SuppressWarnings("unchecked")
@@ -30,13 +23,10 @@ public class NutrientClaimSpecification {
                 .orElseGet(() -> root.join("productNutrient", JoinType.LEFT));
     }
 
-    /**
-     * 여러 NutrientClaim을 AND 조건으로 결합
-     */
     public static Specification<Product> hasClaims(List<NutrientClaim> claims) {
-        if (claims == null || claims.isEmpty()) return Specification.where((Specification<Product>) null);
+        if (claims == null || claims.isEmpty()) return (root, query, cb) -> null;
 
-        Specification<Product> combined = Specification.where((Specification<Product>) null);
+        Specification<Product> combined = (root, query, cb) -> null;
         for (NutrientClaim claim : claims) {
             combined = combined.and(forClaim(claim));
         }
@@ -65,9 +55,6 @@ public class NutrientClaimSpecification {
         };
     }
 
-    // ── 열량 ────────────────────────────────────────────────────────────────────
-
-    /** 저열량: 고체 100g당 40kcal 미만 OR 액체 100mL당 20kcal 미만 */
     private static Specification<Product> lowCalorie() {
         return (root, query, cb) -> {
             Join<Product, ProductNutrient> n = getNutrientJoin(root);
@@ -80,7 +67,6 @@ public class NutrientClaimSpecification {
         };
     }
 
-    /** 무열량: 액체 100mL당 4kcal 미만 */
     private static Specification<Product> noCalorie() {
         return (root, query, cb) -> {
             Join<Product, ProductNutrient> n = getNutrientJoin(root);
@@ -91,9 +77,6 @@ public class NutrientClaimSpecification {
         };
     }
 
-    // ── 나트륨 ──────────────────────────────────────────────────────────────────
-
-    /** 저나트륨: 100g당 120mg 미만 */
     private static Specification<Product> lowSodium() {
         return (root, query, cb) -> {
             Join<Product, ProductNutrient> n = getNutrientJoin(root);
@@ -105,7 +88,6 @@ public class NutrientClaimSpecification {
         };
     }
 
-    /** 무나트륨: 100g당 5mg 미만 */
     private static Specification<Product> noSodium() {
         return (root, query, cb) -> {
             Join<Product, ProductNutrient> n = getNutrientJoin(root);
@@ -117,9 +99,6 @@ public class NutrientClaimSpecification {
         };
     }
 
-    // ── 당류 ────────────────────────────────────────────────────────────────────
-
-    /** 저당: 고체 100g당 5g 미만 OR 액체 100mL당 2.5g 미만 */
     private static Specification<Product> lowSugar() {
         return (root, query, cb) -> {
             Join<Product, ProductNutrient> n = getNutrientJoin(root);
@@ -132,7 +111,6 @@ public class NutrientClaimSpecification {
         };
     }
 
-    /** 무당: 100g(mL)당 0.5g 미만 */
     private static Specification<Product> noSugar() {
         return (root, query, cb) -> {
             Join<Product, ProductNutrient> n = getNutrientJoin(root);
@@ -144,9 +122,6 @@ public class NutrientClaimSpecification {
         };
     }
 
-    // ── 지방 ────────────────────────────────────────────────────────────────────
-
-    /** 저지방: 고체 100g당 3g 미만 OR 액체 100mL당 1.5g 미만 */
     private static Specification<Product> lowFat() {
         return (root, query, cb) -> {
             Join<Product, ProductNutrient> n = getNutrientJoin(root);
@@ -159,7 +134,6 @@ public class NutrientClaimSpecification {
         };
     }
 
-    /** 무지방: 100g(mL)당 0.5g 미만 */
     private static Specification<Product> noFat() {
         return (root, query, cb) -> {
             Join<Product, ProductNutrient> n = getNutrientJoin(root);
@@ -171,9 +145,6 @@ public class NutrientClaimSpecification {
         };
     }
 
-    // ── 트랜스지방 ──────────────────────────────────────────────────────────────
-
-    /** 저트랜스지방: 100g당 0.5g 미만 */
     private static Specification<Product> lowTransFat() {
         return (root, query, cb) -> {
             Join<Product, ProductNutrient> n = getNutrientJoin(root);
@@ -185,12 +156,6 @@ public class NutrientClaimSpecification {
         };
     }
 
-    // ── 포화지방 ────────────────────────────────────────────────────────────────
-
-    /**
-     * 저포화지방: (고체 100g당 1.5g 미만 OR 액체 100mL당 0.75g 미만)
-     *            AND 포화지방이 열량의 10% 미만
-     */
     private static Specification<Product> lowSaturatedFat() {
         return (root, query, cb) -> {
             Join<Product, ProductNutrient> n = getNutrientJoin(root);
@@ -209,9 +174,6 @@ public class NutrientClaimSpecification {
         };
     }
 
-    /**
-     * 무포화지방: 고체 100g당 1.5g 미만 OR 액체 100mL당 0.1g 미만
-     */
     private static Specification<Product> noSaturatedFat() {
         return (root, query, cb) -> {
             Join<Product, ProductNutrient> n = getNutrientJoin(root);
@@ -224,13 +186,6 @@ public class NutrientClaimSpecification {
         };
     }
 
-    // ── 콜레스테롤 ──────────────────────────────────────────────────────────────
-
-    /**
-     * 저콜레스테롤: (고체 100g당 20mg 미만 OR 액체 100mL당 10mg 미만)
-     *             AND 포화지방 (고체 1.5g 미만 OR 액체 0.75g 미만)
-     *             AND 포화지방이 열량의 10% 미만
-     */
     private static Specification<Product> lowCholesterol() {
         return (root, query, cb) -> {
             Join<Product, ProductNutrient> n = getNutrientJoin(root);
@@ -253,11 +208,6 @@ public class NutrientClaimSpecification {
         };
     }
 
-    /**
-     * 무콜레스테롤: 100g(mL)당 5mg 미만
-     *             AND 포화지방 (고체 1.5g 미만 OR 액체 0.75g 미만)
-     *             AND 포화지방이 열량의 10% 미만
-     */
     private static Specification<Product> noCholesterol() {
         return (root, query, cb) -> {
             Join<Product, ProductNutrient> n = getNutrientJoin(root);
@@ -277,11 +227,6 @@ public class NutrientClaimSpecification {
         };
     }
 
-    // ── 식이섬유 ────────────────────────────────────────────────────────────────
-
-    /**
-     * 식이섬유 함유: 100g당 3g 이상 OR 100kcal당 1.5g 이상
-     */
     private static Specification<Product> fiberSource() {
         return (root, query, cb) -> {
             Join<Product, ProductNutrient> n = getNutrientJoin(root);
@@ -298,9 +243,6 @@ public class NutrientClaimSpecification {
         };
     }
 
-    /**
-     * 고식이섬유: 100g당 6g 이상 OR 100kcal당 3g 이상
-     */
     private static Specification<Product> highFiber() {
         return (root, query, cb) -> {
             Join<Product, ProductNutrient> n = getNutrientJoin(root);
@@ -317,12 +259,6 @@ public class NutrientClaimSpecification {
         };
     }
 
-    // ── 단백질 ──────────────────────────────────────────────────────────────────
-
-    /**
-     * 단백질 함유 (1일 기준치 55g):
-     *   고체: 100g당 5.5g 이상 / 액체: 100mL당 2.75g 이상 / 100kcal당 2.75g 이상
-     */
     private static Specification<Product> proteinSource() {
         return (root, query, cb) -> {
             Join<Product, ProductNutrient> n = getNutrientJoin(root);
@@ -344,10 +280,6 @@ public class NutrientClaimSpecification {
         };
     }
 
-    /**
-     * 고단백:
-     *   고체: 100g당 11g 이상 / 액체: 100mL당 5.5g 이상 / 100kcal당 5.5g 이상
-     */
     private static Specification<Product> highProtein() {
         return (root, query, cb) -> {
             Join<Product, ProductNutrient> n = getNutrientJoin(root);
