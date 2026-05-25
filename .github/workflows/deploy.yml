@@ -39,6 +39,7 @@ jobs:
           naver.client-secret=$NAVER_CLIENT_SECRET
           naver.redirect-uri=$NAVER_REDIRECT_URI
           app.frontend-url=$APP_FRONTEND_URL
+          server.forward-headers-strategy=framework
           EOF
         env:
           SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
